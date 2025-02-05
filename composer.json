@@ -1,0 +1,15 @@
+{
+    "name": "titus/dolmen",
+    "description": "website responsive",
+    "autoload": {
+        "psr-4": {
+            "Titus\\Dolmen\\": "composer/"
+        }
+    },
+    "authors": [
+        {
+            "name": "titus"
+        }
+    ],
+    "require": {}
+}
