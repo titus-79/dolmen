@@ -1,0 +1,55 @@
+# Fichiers d'environnement
+.env
+.env.local
+.env.*.local
+
+# Dossiers et fichiers Docker
+/docker-compose.override.yml
+/docker/data/
+*.log
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Dépendances PHP et Composer
+/vendor/
+composer.lock
+composer.phar
+
+# Fichiers de cache PHP
+*.cache
+*.php_cs.cache
+
+# Dossiers de données
+/var/
+/public/uploads/
+/database/data/
+
+# Fichiers IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# Fichiers de logs et bases de données locales
+*.log
+*.sql
+*.sqlite
+*.db
+
+# Exception pour les fichiers de schéma SQL
+!database/schema.sql
+!database/migrations/*.sql
+
+# Fichiers de configuration locaux
+config.local.php
+parameters.local.yml
+
+# Fichiers de build et assets compilés
+/node_modules/
+/public/build/
+/public/hot/
+*.map
