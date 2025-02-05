@@ -20,8 +20,8 @@ Site web pour un photographe spécialisé dans la photographie de dolmens. Le si
 
 1. Clonez le dépôt :
 ```bash
-git clone [URL_DU_REPO]
-cd [NOM_DU_PROJET]
+git clone https://github.com/titus-79/dolmen.git
+cd dolmen
 ```
 
 2. Copiez le fichier .env.example en .env et configurez les variables d'environnement :
