@@ -1,12 +1,22 @@
-# Configurez tous les fichiers texte pour utiliser LF
+# Configuration par défaut : normalisation des fins de ligne
 * text=auto eol=lf
 
-# Spécifiez explicitement les fichiers qui doivent utiliser LF
+# Fichiers de configuration
+.env* text eol=lf
 *.php text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
 *.js text eol=lf
 *.css text eol=lf
 *.html text eol=lf
-*.yml text eol=lf
 *.md text eol=lf
-*.json text eol=lf
 *.sql text eol=lf
+
+# Fichiers binaires qui ne doivent pas être modifiés
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.zip binary
+*.pdf binary
