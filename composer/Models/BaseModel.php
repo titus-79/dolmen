@@ -1,6 +1,6 @@
 <?php
 namespace Titus\Dolmen\Models;
-use Models\Database;
+
 
 abstract class BaseModel {
     protected $db;

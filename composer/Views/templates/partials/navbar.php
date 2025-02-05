@@ -3,19 +3,19 @@
             <span></span>
         </div>
         <div>
-            <a href="../home/index.php">
+            <a href="/">
                 <img id="logo" src="/assets/images/Icones/chasseur_dolmen.svg" alt="Logo" width="50" height="50">
             </a>
         </div>
         <div id="links">
-            <a href="../about/about.php">À propos</a>
-            <a href="../portfolio/portfolio.php">Porfolio</a>
-            <a href="../shop/tirage.php">Tirage</a>
-            <a href="../event/event.php">Evènement</a>
-            <a href="../contact/contact.php">Contact</a>
+            <a href="/about">À propos</a>
+            <a href="/portfolio">Porfolio</a>
+            <a href="/shop">Tirage</a>
+            <a href="/events">Evènement</a>
+            <a href="/contact">Contact</a>
         </div>
         <div id="user">
-            <a href="../../connexion.php">
+            <a href="/login">
                 <?php
                 if (isset($_SESSION['user'])) {
                 ?>
@@ -28,7 +28,7 @@
                 }
                 ?>
             </a>
-            <a href="../shop/panier.php">
+            <a href="/shop/cart">
                 <?php //todo a modifier icone panier plein
                 if (isset($_SESSION['user'])) {
                 ?>

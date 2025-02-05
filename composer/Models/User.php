@@ -2,12 +2,11 @@
 
 namespace Titus\Dolmen\Models;
 
-require_once 'app/Models/Connexion.php';
-require_once 'app/Models/UserGroup.php';
-require_once 'app/Models/Group.php';
-
 use DateTime;
 use PDOException;
+use Titus\Dolmen\Models\Connexion;
+use Titus\Dolmen\Models\UserGroup;
+use Titus\Dolmen\Models\Group;
 
 
 class User
@@ -378,7 +377,40 @@ private ?array $groups = null;
 //        }
 //        return true;
 //    }
+    public function hasRole(string $roleName): bool
+    {
+        if ($this->groups === null) {
+            $conn = Connexion::getInstance()->getConn();
+            $stmt = $conn->prepare(
+                "SELECT g.name FROM `groups` g 
+             JOIN users_groups ug ON g.id_group = ug.id_group 
+             WHERE ug.id_user = ?"
+            );
+            $stmt->execute([$this->id]);
+            $this->groups = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        }
 
+        return in_array($roleName, $this->groups);
+    }
+
+    public static function findByLogin(string $login): ?User
+    {
+        try {
+            $conn = Connexion::getInstance()->getConn();
+            $stmt = $conn->prepare("SELECT * FROM users WHERE login_user = ?");
+            $stmt->execute([$login]);
+
+            if ($userData = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                return self::hydrate($userData);
+            }
+
+            return null;
+        } catch (\PDOException $e) {
+            // Log l'erreur
+            error_log("Erreur lors de la recherche d'utilisateur : " . $e->getMessage());
+            throw $e;
+        }
+    }
 
 
 }

@@ -11,6 +11,10 @@ class Router {
         $this->routes['GET'][$path] = $handler;
     }
 
+    public function post(string $path, string $handler): void {
+        $this->routes['POST'][$path] = $handler;
+    }
+
     public function run(): void {
         // Récupère la méthode HTTP (GET, POST, etc.)
         $method = $_SERVER['REQUEST_METHOD'];

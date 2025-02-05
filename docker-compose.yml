@@ -10,7 +10,10 @@ services:
       - php
 
   php:
-    build: ./docker/php
+#    build: ./docker/php
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
     volumes:
       - .:/var/www/html
     environment:

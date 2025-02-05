@@ -1,29 +1,10 @@
-<!doctype html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="../../../../public/assets/styles/normalize.css">
-    <link rel="stylesheet" href="../../../../public/assets/styles/styles.css">
-    <link rel="icon" type="image/x-icon" sizes="16x16" href="../../../../public/assets/images/Icones/chasseur_dolmen.svg">
-    <title>À propos</title>
-</head>
-<body>
-<header>
-<?php
-include 'navbar.php';
-?>
-
-</header>
-<main>
-
-</main>
-<?php
-include 'footer.php';
-?>
-
-<script src="../../../../public/assets/js/burger.js"></script>
-</body>
-</html>
+<div id="about">
+    <img src="/assets/images/Cromlechs%20de%20Mandale,%20Urrugne_1.jpg" alt="photo de l'artiste">
+    <div class="content">
+        <h2>Sebastien Joffre</h2>
+        <p>Lorem projet_dolmen_data ipsum dolor sit amet, consectetur adipisicing elit. Accusantium alias aliquid fugiat laboriosam
+            magni minima quidem repellat tempora. Aperiam at aut facilis, itaque recusandae reiciendis similique
+            voluptas. Aliquid amet animi dicta distinctio, ducimus error facilis fuga id ipsam maiores mollitia
+            nobis odio, odit quam quibusdam soluta sunt suscipit voluptas voluptatum.</p>
+    </div>
+</div>

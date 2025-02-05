@@ -2,11 +2,9 @@
 
 namespace Titus\Dolmen\Controllers;
 
-class HomeController extends BaseController {
-    /**
-     * @throws \Exception
-     */
-    public function index(): void
+class AboutController extends BaseController
+{
+    public function about(): void
     {
         $data = [
             'pageTitle' => 'Accueil - Chasseur de Dolmens',
@@ -14,11 +12,8 @@ class HomeController extends BaseController {
             'aboutText' => 'Découvrez l\'univers fascinant des dolmens à travers mon objectif...'
         ];
 
-        $this->render('home/index', $data);
+        $this->render('about/about',$data);
     }
 
-    public function getHomeUrl(): string
-    {
-        return '/home/index.php';
-    }
+
 }
