@@ -1,5 +1,4 @@
 <?php
-
 namespace Titus\Dolmen\Services;
 
 use Titus\Dolmen\Models\User;
@@ -19,24 +18,34 @@ class Auth
         return null;
     }
 
-    public static function requireAuth()
+    public static function requireAuth(bool $redirect = true): bool
     {
         if (!self::check()) {
-            $_SESSION['error'] = "Vous devez être connecté pour accéder à cette page";
-            header('Location: /login');
-            exit;
+            if ($redirect) {
+                $_SESSION['error'] = "Vous devez être connecté pour accéder à cette page";
+                header('Location: /login');
+                exit;
+            }
+            return false;
         }
+        return true;
     }
 
-    public static function requireAdmin()
+    public static function requireAdmin(bool $redirect = true): bool
     {
-        self::requireAuth();
-        $user = self::user();
-
-        if (!$user->hasRole('Admin')) {
-            $_SESSION['error'] = "Accès non autorisé";
-            header('Location: /');
-            exit;
+        if (!self::requireAuth($redirect)) {
+            return false;
         }
+
+        $user = self::user();
+        if (!$user->hasRole('Admin')) {
+            if ($redirect) {
+                $_SESSION['error'] = "Accès non autorisé";
+                header('Location: /');
+                exit;
+            }
+            return false;
+        }
+        return true;
     }
 }

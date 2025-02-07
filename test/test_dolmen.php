@@ -1,9 +1,9 @@
 <?php
-use Model\Group;
-use Model\User;
+namespace Titus\Dolmen\Tests;
 
-require_once 'app/Models/Group.php';
-require_once 'app/Models/User.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use Titus\Dolmen\Models\Group;
 
 $admin = new \Model\Group();
 $admin->setName("Admin");

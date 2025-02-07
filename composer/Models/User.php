@@ -15,14 +15,14 @@ private ?int $id = null;
 private string $name;
 private string $login;
 private string $passwordHash;
-private ?string $status; //  todo verifier doublon avec group
+private ?string $status = null; //  todo verifier doublon avec group
 private string $firstname;
 private string $email;
 private string $tel;
 private string $ip;
-private ?\DateTime $lastConn; // todo
+private ?\DateTime $lastConn = null; // todo
 private \DateTime $createdAt;
-private ?\DateTime $updateAt; // todo
+private ?\DateTime $updateAt = null; // todo
 private ?array $groups = null;
 
     public function getCreatedAt(): \DateTime
@@ -147,12 +147,12 @@ private ?array $groups = null;
         return $this;
     }
 
-    public function getLastConn(): \DateTime
+    public function getLastConn(): ?\DateTime
     {
         return $this->lastConn;
     }
 
-    public function setLastConn(?\DateTime $lastConn): User
+    public function setLastConn(?\DateTime $lastConn): self
     {
         $this->lastConn = $lastConn;
         return $this;
@@ -180,22 +180,8 @@ private ?array $groups = null;
     public static function hydrate(array $properties): User
     {
         $user = new User;
-//        $user
-//            ->setId($properties['id_user'])
-//            ->setName($properties['name_user'])
-//            ->setLogin($properties['login_user'])
-//            ->setPasswordHash($properties['password_hash_user'])
-//            ->setStatus($properties['status_user'])
-//            ->setFirstname($properties['firstname_user'])
-//            ->setEmail($properties['email_user'])
-//            ->setTel($properties['tel_user'])
-//            ->setIp($properties['ip_user'])
-//            ->setLastConn($properties['last_conn'])
-//            ->setCreatedAt(new DateTime($properties['created_at']))
-//            ->setUpdateAt($properties['update_at']);
 
-
-
+        // Propriétés obligatoires
         $user->setId($properties['id_user'])
             ->setName($properties['name_user'])
             ->setLogin($properties['login_user'])
@@ -203,6 +189,7 @@ private ?array $groups = null;
             ->setFirstname($properties['firstname_user'])
             ->setEmail($properties['email_user']);
 
+        // Propriétés optionnelles avec vérification
         if (isset($properties['status_user'])) {
             $user->setStatus($properties['status_user']);
         }
@@ -215,16 +202,34 @@ private ?array $groups = null;
             $user->setIp($properties['ip_user']);
         }
 
-        if (isset($properties['last_conn']) && $properties['last_conn']) {
-            $user->setLastConn(new DateTime($properties['last_conn']));
+        // Gestion des dates avec vérification
+        if (!empty($properties['last_conn'])) {
+            try {
+                $user->setLastConn(new \DateTime($properties['last_conn']));
+            } catch (\Exception $e) {
+                error_log("Erreur lors de la conversion de last_conn: " . $e->getMessage());
+                $user->setLastConn(null);
+            }
         }
 
-        if (isset($properties['created_at']) && $properties['created_at']) {
-            $user->setCreatedAt(new DateTime($properties['created_at']));
+        if (!empty($properties['created_at'])) {
+            try {
+                $user->setCreatedAt(new \DateTime($properties['created_at']));
+            } catch (\Exception $e) {
+                error_log("Erreur lors de la conversion de created_at: " . $e->getMessage());
+                $user->setCreatedAt(new \DateTime()); // Date actuelle par défaut
+            }
+        } else {
+            $user->setCreatedAt(new \DateTime()); // Date actuelle par défaut
         }
 
-        if (isset($properties['update_at']) && $properties['update_at']) {
-            $user->setUpdateAt(new DateTime($properties['update_at']));
+        if (!empty($properties['update_at'])) {
+            try {
+                $user->setUpdateAt(new \DateTime($properties['update_at']));
+            } catch (\Exception $e) {
+                error_log("Erreur lors de la conversion de update_at: " . $e->getMessage());
+                $user->setUpdateAt(null);
+            }
         }
 
         return $user;

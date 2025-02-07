@@ -3,36 +3,72 @@ namespace Titus\Dolmen\Models;
 
 class Order extends BaseModel
 {
-    protected $table = 'order';
+    protected $table = '`order`';
 
-    /**
-     * Crée une nouvelle commande
-     * @param array $data Données de la commande
-     * @return int|null ID de la commande créée
-     */
+    public function getUserOrders($userId)
+    {
+        try {
+            $query = "
+                SELECT DISTINCT o.*
+                FROM `order` o
+                WHERE o.id_user = ?
+                ORDER BY o.created_at DESC
+            ";
+
+            error_log("Exécution de la requête getUserOrders pour userId: " . $userId);
+            $orders = $this->db->query($query, [$userId]);
+            error_log("Nombre de commandes trouvées: " . count($orders));
+
+            // Pour chaque commande, récupérons ses tirages
+            foreach ($orders as &$order) {
+                $order['prints'] = $this->getOrderPrints($order['id_order']);
+            }
+
+            return $orders;
+        } catch (\PDOException $e) {
+            error_log("Erreur dans getUserOrders: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    private function getOrderPrints($orderId)
+    {
+        $query = "
+            SELECT p.title_print, p.state_print
+            FROM print p
+            JOIN print_order po ON p.id_print = po.id_print
+            WHERE po.id_order = ?
+        ";
+
+        try {
+            return $this->db->query($query, [$orderId]);
+        } catch (\PDOException $e) {
+            error_log("Erreur dans getOrderPrints: " . $e->getMessage());
+            return [];
+        }
+    }
+
     public function createOrder($data)
     {
         $query = "
-            INSERT INTO {$this->table} 
+            INSERT INTO `order` 
             (status, total_amount, created_at, id_user) 
             VALUES (?, ?, ?, ?)
         ";
 
-        $this->db->query($query, [
-            $data['status'] ?? 'en cours',
-            $data['total_amount'],
-            date('Y-m-d'),
-            $data['user_id']
-        ]);
-
-        return $this->db->lastInsertId();
+        try {
+            return $this->db->query($query, [
+                $data['status'] ?? 'en cours',
+                $data['total_amount'],
+                date('Y-m-d'),
+                $data['user_id']
+            ]);
+        } catch (\PDOException $e) {
+            error_log("Erreur dans createOrder: " . $e->getMessage());
+            return false;
+        }
     }
 
-    /**
-     * Ajoute un tirage à une commande
-     * @param int $orderId ID de la commande
-     * @param int $printId ID du tirage
-     */
     public function addPrintToOrder($orderId, $printId)
     {
         $query = "
@@ -41,27 +77,11 @@ class Order extends BaseModel
             VALUES (?, ?)
         ";
 
-        $this->db->query($query, [$orderId, $printId]);
-    }
-
-    /**
-     * Récupère les commandes d'un utilisateur
-     * @param int $userId ID de l'utilisateur
-     * @return array Liste des commandes
-     */
-    public function getUserOrders($userId)
-    {
-        $query = "
-            SELECT o.*, 
-                   p.title_print, 
-                   p.state_print
-            FROM {$this->table} o
-            JOIN print_order po ON o.id_order = po.id_order
-            JOIN print p ON po.id_print = p.id_print
-            WHERE o.id_user = ?
-            ORDER BY o.created_at DESC
-        ";
-
-        return $this->db->query($query, [$userId]);
+        try {
+            return $this->db->query($query, [$orderId, $printId]);
+        } catch (\PDOException $e) {
+            error_log("Erreur dans addPrintToOrder: " . $e->getMessage());
+            return false;
+        }
     }
 }

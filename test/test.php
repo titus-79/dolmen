@@ -1,4 +1,8 @@
 <?php
+
+namespace Titus\Dolmen\Tests;
+
+require_once __DIR__ . '/../vendor/autoload.php';
 // Le fichier composer/index.php servira de test initial
 // Il nous donnera des informations utiles sur la configuration
 

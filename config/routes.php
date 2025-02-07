@@ -31,9 +31,16 @@ $router->post('/login', 'AuthController@login');
 $router->get('/register', 'AuthController@showRegistrationForm');
 $router->post('/register', 'AuthController@register');
 $router->get('/logout', 'AuthController@logout');
+$router->get('/account', 'AccountController@index');
+$router->get('/account/edit', 'AccountController@editProfile');
+$router->post('/account/edit', 'AccountController@editProfile');
+$router->get('/account/orders', 'AccountController@orderHistory');
 
 // Route protégée pour le compte utilisateur
 $router->get('/account', 'AccountController@index');
+
+error_log("Routes configurées: " . print_r($router->getRoutes(), true));
+
 
 // Exécutez le routeur
 $router->run();

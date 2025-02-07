@@ -4,7 +4,8 @@
     "type": "project",
     "autoload": {
         "psr-4": {
-            "Titus\\Dolmen\\": "composer/"
+            "Titus\\Dolmen\\": "composer/",
+            "Titus\\Dolmen\\Tests\\": "test/"
         }
     },
     "authors": [
