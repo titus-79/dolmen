@@ -12,7 +12,14 @@ class AuthController extends BaseController
 
     public function showLoginForm()
     {
-        // Génération d'un token CSRF
+        // Vérifier si l'utilisateur est déjà connecté
+        if (isset($_SESSION['user'])) {
+            // Rediriger vers le dashboard
+            header('Location: /account');
+            exit;
+        }
+
+        // Si l'utilisateur n'est pas connecté, générer le token CSRF et afficher le formulaire
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
         $this->render('auth/login', [
