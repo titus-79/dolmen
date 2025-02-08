@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle ?? 'Chasseur de Dolmens') ?></title>
-<link rel="stylesheet" href="/assets/styles/normalize.css">
-<link rel="stylesheet" href="/assets/styles/styles.css">
+    <link rel="stylesheet" href="/assets/styles/normalize.css">
+    <link rel="stylesheet" href="/assets/styles/styles.css">
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="/assets/images/Icones/chasseur_dolmen.svg">
+
 </head>
 <body>
 <header>

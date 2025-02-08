@@ -93,7 +93,7 @@
                                pattern="[0-9]{10}"
                                value="<?= htmlspecialchars($user->getTel()) ?>">
                     </div>
-                    <!-- Remplacez la div existante de sélection de rôle par ce code -->
+
                     <div class="form-group col-md-6">
                         <label>Rôle de l'utilisateur *</label>
                         <div class="role-selection">
@@ -126,6 +126,14 @@
                                 </label>
                             </div>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox"
+                                   name="newsletter_subscription"
+                                <?= $user->isSubscribedToNewsletter() ? 'checked' : '' ?>>
+                            Abonné à la newsletter
+                        </label>
                     </div>
                 </div>
 

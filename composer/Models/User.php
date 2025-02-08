@@ -422,6 +422,31 @@ private ?array $groups = null;
                 ':id' => $userId
             ]);
 
+            // Gestion de l'abonnement à la newsletter
+//            $newsletterSubscription = isset($data['newsletter_subscription']) ? true : false;
+            $newsletterSubscription = !empty($data['newsletter_subscription']);
+
+            // Point d'arrêt
+            xdebug_break();
+
+// Log détaillé
+            error_log("Données de mise à jour : " . print_r($data, true));
+            error_log("Statut newsletter : " . ($newsletterSubscription ? 'Abonné' : 'Désabonné'));
+
+            if ($newsletterSubscription) {
+                error_log("dans s'abonner" );
+                // S'abonner ou réabonner
+                $success = NewsletterSubscription::subscribe($userId, $data['email']) && $success;
+                if (!NewsletterSubscription::subscribe($userId, $data['email'])) {
+                    error_log("Échec de l'abonnement newsletter pour l'utilisateur $userId");
+                    // Gérer l'erreur potentielle
+                }
+            } else {
+                // Se désabonner
+                error_log("dans se désabonner" );
+                $success = NewsletterSubscription::unsubscribe($userId) && $success;
+            }
+
             // Si un nouveau mot de passe est fourni
             if (!empty($data['password'])) {
                 $sql = "UPDATE users SET password_hash_user = :password WHERE id_user = :id";
@@ -523,6 +548,27 @@ private ?array $groups = null;
         } catch (\PDOException $e) {
             error_log("Erreur lors de la recherche de l'utilisateur : " . $e->getMessage());
             return null;
+        }
+    }
+
+    public function isSubscribedToNewsletter(): bool
+    {
+        try {
+            $conn = Connexion::getInstance()->getConn();
+            $stmt = $conn->prepare("
+            SELECT is_active 
+            FROM newsletter_subscriptions 
+            WHERE id_user = ? 
+            LIMIT 1
+        ");
+            $stmt->execute([$this->id]);
+
+            $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            return $result ? (bool)$result['is_active'] : false;
+        } catch (\PDOException $e) {
+            error_log("Erreur lors de la vérification de l'abonnement newsletter : " . $e->getMessage());
+            return false;
         }
     }
 

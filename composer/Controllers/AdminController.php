@@ -7,6 +7,8 @@ use Titus\Dolmen\Models\Event;
 use Titus\Dolmen\Models\Portfolio;
 use Titus\Dolmen\Models\Prints;
 use Titus\Dolmen\Models\Group;
+use Titus\Dolmen\Models\Newsletter;
+use Titus\Dolmen\Models\NewsletterSubscription;
 
 class AdminController extends BaseController
 {
@@ -77,6 +79,10 @@ class AdminController extends BaseController
                 ->setPasswordHash(password_hash($userData['password'], PASSWORD_BCRYPT));
 
             if ($user->save()) {
+                // Si l'option newsletter est cochée, enregistrer l'abonnement
+                if (isset($_POST['newsletter_subscription'])) {
+                    NewsletterSubscription::subscribe($user->getId(), $user->getEmail());
+                }
                 $_SESSION['success'] = "Utilisateur créé avec succès";
                 header('Location: /admin/users');
                 exit;
@@ -116,6 +122,7 @@ class AdminController extends BaseController
                     'firstname' => $_POST['firstname_user'] ?? '',
                     'email' => $_POST['email_user'] ?? '',
                     'tel' => $_POST['tel_user'] ?? '',
+                    'newsletter_subscription' => isset($_POST['newsletter_subscription']),
                     'role' => $_POST['role'] ?? 'Member' // Rôle par défaut si non spécifié
                 ];
 
@@ -181,6 +188,46 @@ class AdminController extends BaseController
 
         header('Location: /admin/users');
         exit;
+    }
+
+    public function newsletters()
+    {
+        $newsletters = Newsletter::getAllNewsletters();
+        $data = [
+            'pageTitle' => 'Gestion des newsletters',
+            'newsletters' => $newsletters
+        ];
+        $this->render('admin/newsletters/index', $data);
+    }
+
+    public function createNewsletter()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $newsletterData = [
+                'title' => $_POST['title'],
+                'content' => $_POST['content'],
+                'created_by' => Auth::user()->getId()
+            ];
+
+            if (Newsletter::create($newsletterData)) {
+                if ($_POST['action'] === 'send') {
+                    // Envoi immédiat
+                    $newsletter->send();
+                    $_SESSION['success'] = "Newsletter créée et envoyée avec succès";
+                } else {
+                    // Sauvegarde comme brouillon
+                    $_SESSION['success'] = "Newsletter sauvegardée comme brouillon";
+                }
+                header('Location: /admin/newsletters');
+                exit;
+            }
+        }
+
+        $data = [
+            'pageTitle' => 'Créer une newsletter',
+            'subscriberCount' => count(NewsletterSubscription::getAllActiveSubscribers())
+        ];
+        $this->render('admin/newsletters/create', $data);
     }
 
     // Gestion des événements

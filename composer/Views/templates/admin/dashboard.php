@@ -150,6 +150,13 @@
                 </ul>
             </div>
             <div class="menu-item">
+                <h3>Communication</h3>
+                <ul>
+                    <li><a href="/admin/newsletters">Gérer les newsletters</a></li>
+                    <li><a href="/admin/newsletters/create">Nouvelle newsletter</a></li>
+                </ul>
+            </div>
+            <div class="menu-item">
                 <h3>Configuration</h3>
                 <ul>
                     <li><a href="/admin/settings">Paramètres du site</a></li>

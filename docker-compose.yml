@@ -31,6 +31,8 @@ services:
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USER}
       MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+      MYSQL_ROOT_HOST: "%"
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./database:/docker-entrypoint-initdb.d

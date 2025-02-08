@@ -42,6 +42,8 @@
                     <th>Nom</th>
                     <th>Prénom</th>
                     <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Abonné Newsletter</th>
                     <th>Rôle</th>
                     <th>Date création</th>
                     <th>Dernière connexion</th>
@@ -55,6 +57,8 @@
                         <td><?= htmlspecialchars($user->getName()) ?></td>
                         <td><?= htmlspecialchars($user->getFirstname()) ?></td>
                         <td><?= htmlspecialchars($user->getEmail()) ?></td>
+                        <td><?= htmlspecialchars($user->getTel())?></td>
+                        <td><?= $user->isSubscribedToNewsletter() ? 'Oui' : 'Non' ?></td>
                         <td>
                             <?php
                             $groups = $user->getGroups();

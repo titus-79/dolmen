@@ -3,6 +3,7 @@ namespace Titus\Dolmen\Controllers;
 
 use Titus\Dolmen\Services\Auth;
 use Titus\Dolmen\Models\Order;
+use Titus\Dolmen\Models\User;
 
 class AccountController extends BaseController
 {
@@ -54,23 +55,28 @@ class AccountController extends BaseController
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
-                $user->setName($_POST['name_user'])
-                    ->setFirstname($_POST['firstname_user'])
-                    ->setEmail($_POST['user_email']);
+                $userData = [
+                    'name' => $_POST['name_user'],
+                    'firstname' => $_POST['firstname_user'],
+                    'email' => $_POST['user_email'],
+                    'tel' => $_POST['tel_user'] ?? '',
+                    'newsletter_subscription' => isset($_POST['newsletter_subscription']),
+                ];
 
-                if (!empty($_POST['tel_user'])) {
-                    $user->setTel($_POST['tel_user']);
-                }
-
+                // Add password to userData if it's being updated
                 if (!empty($_POST['password_hash_user'])) {
-                    $user->setPasswordHash(
-                        password_hash($_POST['password_hash_user'], PASSWORD_BCRYPT)
-                    );
+                    $userData['password'] = $_POST['password_hash_user'];
                 }
 
-                if ($user->save()) {
+                // Use the updateUser method which handles newsletter subscription
+                if (User::updateUser($user->getId(), $userData)) {
                     $_SESSION['success'] = "Profil mis à jour avec succès";
-                    $_SESSION['user'] = base64_encode(serialize($user));
+
+                    // Refresh user data in session
+                    $updatedUser = User::findById($user->getId());
+                    if ($updatedUser) {
+                        $_SESSION['user'] = base64_encode(serialize($updatedUser));
+                    }
                 } else {
                     $_SESSION['error'] = "Erreur lors de la mise à jour du profil";
                 }

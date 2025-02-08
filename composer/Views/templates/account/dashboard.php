@@ -55,6 +55,10 @@
                     <th>Membre depuis :</th>
                     <td><?= $memberSince ? $memberSince->format('d/m/Y') : 'Non disponible' ?></td>
                 </tr>
+                <tr>
+                    <th>Abonné à la NewsLetters</th>
+                    <td><?= $user->isSubscribedToNewsletter() ? 'Oui' : 'Non' ?></td>
+                </tr>
             </table>
             <div class="actions">
                 <a href="/account/edit" class="btn btn-primary">Modifier mon profil</a>

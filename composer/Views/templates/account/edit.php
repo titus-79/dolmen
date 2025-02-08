@@ -66,6 +66,13 @@
             >
         </div>
 
+        <div class="form-group">
+            <label>
+                <input type="checkbox" name="newsletter_subscription" value="1" <?= $user->isSubscribedToNewsletter() ? 'checked' : '' ?>>
+                Abonné à la newsletter
+            </label>
+        </div>
+
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
             <a href="/account" class="btn btn-secondary">Annuler</a>

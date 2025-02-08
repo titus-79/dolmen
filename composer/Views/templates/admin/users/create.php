@@ -113,6 +113,21 @@
                             <?php endforeach; ?>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <div class="newsletter-option">
+                            <input type="checkbox"
+                                   id="newsletter_subscription"
+                                   name="newsletter_subscription"
+                                   checked
+                                   value="1">
+                            <label for="newsletter_subscription">
+                                Je souhaite recevoir la newsletter et les actualités
+                                <small class="text-muted d-block">
+                                    Vous pourrez vous désabonner à tout moment depuis votre espace personnel
+                                </small>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="form-actions">

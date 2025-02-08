@@ -49,6 +49,10 @@ $router->get('/admin/users/edit/{id}', 'AdminController@editUser');
 $router->post('/admin/users/edit/{id}', 'AdminController@editUser');
 $router->get('/admin/users/delete/{id}', 'AdminController@deleteUser');
 
+$router->get('/admin/newsletters', 'AdminController@newsletters');
+$router->get('/admin/newsletters/create', 'AdminController@createNewsletter');
+$router->post('/admin/newsletters/create', 'AdminController@createNewsletter');
+
 $router->get('/admin/events', 'AdminController@events');
 $router->get('/admin/events/edit/{id?}', 'AdminController@editEvent');
 $router->post('/admin/events/edit/{id?}', 'AdminController@editEvent');
