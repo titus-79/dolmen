@@ -39,6 +39,35 @@ $router->get('/account/orders', 'AccountController@orderHistory');
 // Route protégée pour le compte utilisateur
 $router->get('/account', 'AccountController@index');
 
+// Routes d'administration
+$router->get('/admin', 'AdminController@index');
+
+$router->get('/admin/users', 'AdminController@users');
+$router->get('/admin/users/create', 'AdminController@createUser');
+$router->post('/admin/users/create', 'AdminController@createUser');
+$router->get('/admin/users/edit/{id}', 'AdminController@editUser');
+$router->post('/admin/users/edit/{id}', 'AdminController@editUser');
+$router->get('/admin/users/delete/{id}', 'AdminController@deleteUser');
+
+$router->get('/admin/events', 'AdminController@events');
+$router->get('/admin/events/edit/{id?}', 'AdminController@editEvent');
+$router->post('/admin/events/edit/{id?}', 'AdminController@editEvent');
+$router->get('/admin/events/delete/{id}', 'AdminController@deleteEvent');
+
+$router->get('/admin/portfolio', 'AdminController@portfolio');
+$router->get('/admin/portfolio/edit/{id?}', 'AdminController@editPortfolio');
+$router->post('/admin/portfolio/edit/{id?}', 'AdminController@editPortfolio');
+$router->get('/admin/portfolio/delete/{id}', 'AdminController@deletePortfolio');
+
+$router->get('/admin/prints', 'AdminController@prints');
+$router->get('/admin/prints/edit/{id?}', 'AdminController@editPrint');
+$router->post('/admin/prints/edit/{id?}', 'AdminController@editPrint');
+$router->get('/admin/prints/delete/{id}', 'AdminController@deletePrint');
+
+$router->get('/admin/orders', 'AdminController@orders');
+$router->get('/admin/orders/{id}', 'AdminController@orderDetails');
+$router->post('/admin/orders/{id}/status', 'AdminController@updateOrderStatus');
+
 error_log("Routes configurées: " . print_r($router->getRoutes(), true));
 
 

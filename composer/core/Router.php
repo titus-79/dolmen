@@ -8,58 +8,60 @@ class Router {
 
     public function get(string $path, string $handler): void {
         // Stocke la route avec sa méthode et son contrôleur
-        $this->routes['GET'][$path] = $handler;
+        $this->addRoute('GET', $path, $handler);
     }
 
     public function post(string $path, string $handler): void {
-        $this->routes['POST'][$path] = $handler;
+        $this->addRoute('POST', $path, $handler);
     }
 
+    private function addRoute(string $method, string $path, string $handler): void {
+        // Convertit les paramètres de route (ex: {id}) en expression régulière
+        $pattern = preg_replace('/\{([a-zA-Z0-9_]+)\}/', '(?P<$1>[^/]+)', $path);
+        $pattern = "#^" . $pattern . "$#";
+
+        $this->routes[$method][$pattern] = [
+            'handler' => $handler,
+            'path' => $path
+        ];
+    }
     public function getRoutes(): array {
         return $this->routes;
     }
 
     public function run(): void {
-        // Récupère la méthode HTTP (GET, POST, etc.)
         $method = $_SERVER['REQUEST_METHOD'];
+        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-        // Récupère le chemin de l'URL
-        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        error_log("Router::run - Méthode: $method, URI: $uri");
 
-        // Log pour le débogage
-        error_log("Router::run - Méthode: $method, Chemin: $path");
-        error_log("Routes disponibles: " . print_r($this->routes, true));
+        foreach ($this->routes[$method] ?? [] as $pattern => $route) {
+            if (preg_match($pattern, $uri, $matches)) {
+                // Extrait les paramètres de l'URL
+                $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
 
-        // Si la route existe
-        if (isset($this->routes[$method][$path])) {
-            // Récupère le contrôleur et la méthode (exemple: 'HomeController@index')
-            [$controller, $action] = explode('@', $this->routes[$method][$path]);
+                [$controller, $action] = explode('@', $route['handler']);
+                $controller = "Titus\\Dolmen\\Controllers\\" . $controller;
 
-            // Ajoute le namespace complet
-            $controller = "Titus\\Dolmen\\Controllers\\" . $controller;
-
-            // Vérifie si le contrôleur existe
-            if (class_exists($controller)) {
-                // Log pour le débogage
-                error_log("Contrôleur trouvé: $controller");
-                // Crée une instance du contrôleur et appelle la méthode
-                $controllerInstance = new $controller();
-                if (method_exists($controllerInstance, $action)) {
-                    error_log("Méthode trouvée: $action");
-                    $controllerInstance->$action();
-                    return;
+                if (class_exists($controller)) {
+                    $controllerInstance = new $controller();
+                    if (method_exists($controllerInstance, $action)) {
+                        // Appelle la méthode avec les paramètres extraits de l'URL
+                        call_user_func_array([$controllerInstance, $action], $params);
+                        return;
+                    } else {
+                        error_log("Méthode non trouvée: $action dans $controller");
+                    }
                 } else {
-                    error_log("Méthode non trouvée: $action");
+                    error_log("Contrôleur non trouvé: $controller");
                 }
-            } else {
-                error_log("Contrôleur non trouvé: $controller");
             }
-        } else {
-            error_log("Route non trouvée pour $method $path");
         }
 
-        // Si on arrive ici, c'est que la route n'existe pas
+        // Si aucune route ne correspond
         header("HTTP/1.0 404 Not Found");
+        error_log("Route non trouvée pour $method $uri");
         echo "Page non trouvée";
     }
+
 }

@@ -333,55 +333,6 @@ private ?array $groups = null;
         }
     }
 
-
-
-
-
-
-//                // Ajouter le mot de passe à la mise à jour seulement s'il a été modifié
-//                if (isset($this->passwordHash)) {
-//                    $sql .= ", password_hash_user = ?";
-//                    $params[] = $this->passwordHash;
-//                }
-//
-//                $sql .= " WHERE id_user = ?";
-//                $params[] = $exists['id_user'];
-//
-//                $stt = $conn->prepare($sql);
-//                return $stt->execute($params);
-//
-//            } else {
-//                $stt = $conn->prepare(
-//                    "INSERT INTO `users` (name_user, login_user, password_hash_user, firstname_user, email_user, tel_user, ip_user, created_at) VALUES (?,?,?,?,?,?,?,?)"
-//                );
-//                $stt->bindParam(1, $this->name);
-//                $stt->bindParam(2, $this->login);
-//                $stt->bindParam(3, $this->passwordHash);
-//                $stt->bindParam(4, $this->firstname);
-//                $stt->bindParam(5, $this->email);
-//                $stt->bindParam(6, $this->tel);
-//                $this->ip = $_SERVER['REMOTE_ADDR'];
-//                $stt->bindParam(7, $this->ip);
-//                $datenow = new DateTime;
-//                $datenow = $datenow->format('Y-m-d H:i:s');
-//                $stt->bindParam(8, $datenow);
-////            $idAdress = 1; // todo class adress,
-////            $stt->bindParam(9, $idAdress);
-//                $stt->execute();
-//                $this->id = $conn->lastInsertId();
-//
-//                $memberGroup = Group::findByName('Member');
-//                $userGroup = new UserGroup($this->id, $memberGroup->getId());
-//                $userGroup->save();
-//            }
-//
-//
-//        } catch (PDOException $e) {
-//            echo $e->getMessage();
-//            return false;
-//        }
-//        return true;
-//    }
     public function hasRole(string $roleName): bool
     {
         if ($this->groups === null) {
@@ -414,6 +365,164 @@ private ?array $groups = null;
             // Log l'erreur
             error_log("Erreur lors de la recherche d'utilisateur : " . $e->getMessage());
             throw $e;
+        }
+    }
+
+    public static function getAllUsers(): array
+    {
+        try {
+            $conn = Connexion::getInstance()->getConn();
+            $stmt = $conn->prepare("
+                SELECT u.*, GROUP_CONCAT(g.name) as group_names
+                FROM users u
+                LEFT JOIN users_groups ug ON u.id_user = ug.id_user
+                LEFT JOIN `groups` g ON ug.id_group = g.id_group
+                GROUP BY u.id_user
+                ORDER BY u.created_at DESC
+            ");
+            $stmt->execute();
+            $users = [];
+
+            while ($userData = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $user = self::hydrate($userData);
+                // Conversion de la chaîne des groupes en tableau
+                $groupNames = $userData['group_names'] ? explode(',', $userData['group_names']) : [];
+                $user->setGroups($groupNames);
+                $users[] = $user;
+            }
+
+            return $users;
+        } catch (\PDOException $e) {
+            error_log("Erreur lors de la récupération des utilisateurs : " . $e->getMessage());
+            return [];
+        }
+    }
+
+    public static function updateUser($userId, array $data): bool
+    {
+        try {
+            $conn = Connexion::getInstance()->getConn();
+            $conn->beginTransaction();
+
+            // Mise à jour des informations de base
+            $sql = "UPDATE users SET 
+                name_user = :name,
+                firstname_user = :firstname,
+                email_user = :email,
+                tel_user = :tel,
+                update_at = NOW()
+            WHERE id_user = :id";
+
+            $stmt = $conn->prepare($sql);
+            $success = $stmt->execute([
+                ':name' => $data['name'],
+                ':firstname' => $data['firstname'],
+                ':email' => $data['email'],
+                ':tel' => $data['tel'],
+                ':id' => $userId
+            ]);
+
+            // Si un nouveau mot de passe est fourni
+            if (!empty($data['password'])) {
+                $sql = "UPDATE users SET password_hash_user = :password WHERE id_user = :id";
+                $stmt = $conn->prepare($sql);
+                $success = $stmt->execute([
+                        ':password' => password_hash($data['password'], PASSWORD_BCRYPT),
+                        ':id' => $userId
+                    ]) && $success;
+            }
+
+            // Mise à jour du rôle
+            if (isset($data['role'])) {
+                // 1. Suppression de tous les rôles existants
+                $stmt = $conn->prepare("DELETE FROM users_groups WHERE id_user = ?");
+                $success = $stmt->execute([$userId]) && $success;
+
+                // 2. Ajout du nouveau rôle
+                $group = Group::findByName($data['role']);
+                if ($group) {
+                    $stmt = $conn->prepare("INSERT INTO users_groups (id_user, id_group) VALUES (?, ?)");
+                    $success = $stmt->execute([$userId, $group->getId()]) && $success;
+                } else {
+                    // Si le rôle n'est pas trouvé, on met l'utilisateur comme membre par défaut
+                    $memberGroup = Group::findByName('Member');
+                    if ($memberGroup) {
+                        $stmt = $conn->prepare("INSERT INTO users_groups (id_user, id_group) VALUES (?, ?)");
+                        $success = $stmt->execute([$userId, $memberGroup->getId()]) && $success;
+                    }
+                }
+            }
+
+            if ($success) {
+                $conn->commit();
+                return true;
+            } else {
+                $conn->rollBack();
+                return false;
+            }
+        } catch (\PDOException $e) {
+            error_log("Erreur lors de la mise à jour de l'utilisateur : " . $e->getMessage());
+            if (isset($conn)) {
+                $conn->rollBack();
+            }
+            return false;
+        }
+    }
+    public static function deleteUser($userId): bool
+    {
+        try {
+            $conn = Connexion::getInstance()->getConn();
+            $conn->beginTransaction();
+
+            // Suppression des relations dans users_groups
+            $stmt = $conn->prepare("DELETE FROM users_groups WHERE id_user = ?");
+            $stmt->execute([$userId]);
+
+            // Suppression de l'utilisateur
+            $stmt = $conn->prepare("DELETE FROM users WHERE id_user = ?");
+            $success = $stmt->execute([$userId]);
+
+            if ($success) {
+                $conn->commit();
+                return true;
+            } else {
+                $conn->rollBack();
+                return false;
+            }
+        } catch (\PDOException $e) {
+            if (isset($conn)) {
+                $conn->rollBack();
+            }
+            error_log("Erreur lors de la suppression de l'utilisateur : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public static function findById($id): ?User
+    {
+        try {
+            $conn = Connexion::getInstance()->getConn();
+            $stmt = $conn->prepare("
+                SELECT u.*, GROUP_CONCAT(g.name) as group_names
+                FROM users u
+                LEFT JOIN users_groups ug ON u.id_user = ug.id_user
+                LEFT JOIN `groups` g ON ug.id_group = g.id_group
+                WHERE u.id_user = ?
+                GROUP BY u.id_user
+            ");
+            $stmt->execute([$id]);
+
+            if ($userData = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $user = self::hydrate($userData);
+                $groupNames = $userData['group_names'] ? explode(',', $userData['group_names']) : [];
+                $user->setGroups($groupNames);
+                return $user;
+            }
+
+            return null;
+        } catch (\PDOException $e) {
+            error_log("Erreur lors de la recherche de l'utilisateur : " . $e->getMessage());
+            return null;
         }
     }
 

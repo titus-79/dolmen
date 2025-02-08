@@ -16,9 +16,23 @@
         </div>
     <?php endif; ?>
 
+
     <div class="user-info">
         <h1>Bienvenue, <?= htmlspecialchars($user->getFirstname()) ?></h1>
         <div class="profile-card">
+            <div class="dashboard-container">
+                <!-- Section d'administration - visible uniquement pour les administrateurs -->
+                <?php if ($user->hasRole('Admin')): ?>
+                    <div class="admin-access-card">
+                        <h2>Administration</h2>
+                        <p>En tant qu'administrateur, vous avez accès au panneau de gestion du site.</p>
+                        <div class="admin-actions">
+                            <a href="/admin" class="btn btn-admin">
+                                <i class="fas fa-cog"></i> Accéder à l'interface d'administration
+                            </a>
+                        </div>
+                    </div>
+                <?php endif; ?>
             <h2>Informations personnelles</h2>
             <table class="info-table">
                 <tr>
@@ -66,6 +80,7 @@
                 </div>
             </div>
         <?php endif; ?>
+
     </div>
 </div>
 
