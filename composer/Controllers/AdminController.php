@@ -34,15 +34,42 @@ class AdminController extends BaseController
     // Dashboard administrateur
     public function index()
     {
-        $data = [
-            'pageTitle' => 'Administration - Chasseur de Dolmens',
-            'userCount' => count($this->userModel->getAllUsers()),
-            'eventCount' => count($this->eventModel->getAllEvents()),
-            'portfolioCount' => count($this->portfolioModel->getAllPortfolios()),
-            'printsCount' => count($this->printsModel->getAllPrints())
-        ];
+        try {
+            // Récupération des comptages
+            $userCount = is_array($this->userModel->getAllUsers()) ?
+                count($this->userModel->getAllUsers()) : 0;
 
-        $this->render('admin/dashboard', $data);
+            $eventCount = is_array($this->eventModel->getAllEvents()) ?
+                count($this->eventModel->getAllEvents()) : 0;
+
+            $albums = $this->portfolioModel->getAllAlbums();
+            $portfolioCount = is_array($albums) ? count($albums) : 0;
+
+            $prints = $this->printsModel->getAllPrints();
+            $printsCount = is_array($prints) ? count($prints) : 0;
+
+            $data = [
+                'pageTitle' => 'Administration - Chasseur de Dolmens',
+                'userCount' => $userCount,
+                'eventCount' => $eventCount,
+                'portfolioCount' => $portfolioCount,
+                'printsCount' => $printsCount
+            ];
+
+            $this->render('admin/dashboard', $data);
+
+        } catch (\Exception $e) {
+            error_log("Erreur dans AdminController::index : " . $e->getMessage());
+            $_SESSION['error'] = "Une erreur est survenue lors du chargement du tableau de bord";
+            $data = [
+                'pageTitle' => 'Administration - Chasseur de Dolmens',
+                'userCount' => 0,
+                'eventCount' => 0,
+                'portfolioCount' => 0,
+                'printsCount' => 0
+            ];
+            $this->render('admin/dashboard', $data);
+        }
     }
 
     // Gestion des utilisateurs
@@ -277,13 +304,178 @@ class AdminController extends BaseController
     // Gestion du portfolio
     public function portfolio()
     {
-        $portfolios = $this->portfolioModel->getAllPortfolios();
+        $albums = $this->portfolioModel->getAllAlbums();
         $data = [
-            'pageTitle' => 'Gestion du portfolio',
-            'portfolios' => $portfolios
+            'pageTitle' => 'Gestion du Portfolio',
+            'albums' => $albums
         ];
-
         $this->render('admin/portfolio/index', $data);
+    }
+
+    public function createAlbum()
+    {
+        try {
+            $regions = $this->portfolioModel->getAllRegions();
+            $mainAlbums = $this->portfolioModel->getAllAlbums(); // Ajout de cette ligne
+
+            $data = [
+                'pageTitle' => 'Créer un nouvel album',
+                'regions' => $regions,
+                'mainAlbums' => $mainAlbums // Ajout de cette ligne
+            ];
+
+            $this->render('admin/portfolio/create', $data);
+        } catch (\Exception $e) {
+            error_log("Erreur dans createAlbum : " . $e->getMessage());
+            $_SESSION['error'] = "Une erreur est survenue lors du chargement du formulaire";
+            header('Location: /admin/portfolio');
+            exit;
+        }
+    }
+
+    public function storeAlbum()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/portfolio/create');
+            exit;
+        }
+
+        try {
+            // Validation de base
+            if (empty($_POST['title'])) {
+                throw new \Exception("Le titre est requis");
+            }
+
+            if (empty($_POST['region'])) {
+                throw new \Exception("La région est requise");
+            }
+
+            // Validation et upload du fichier
+            if (!isset($_FILES['thumbnail']) || $_FILES['thumbnail']['error'] !== UPLOAD_ERR_OK) {
+                throw new \Exception("L'image de couverture est requise");
+            }
+
+            // Upload du fichier
+            $thumbnail_path = $this->portfolioModel->uploadThumbnail($_FILES['thumbnail']);
+            if (!$thumbnail_path) {
+                throw new \Exception("Erreur lors de l'upload de l'image");
+            }
+
+            // Préparation des données
+            $albumData = [
+                'title' => $_POST['title'],
+                'description' => $_POST['description'] ?? '',
+                'region' => $_POST['region'],
+                'new_region' => $_POST['region'] === 'nouvelle' ? ($_POST['new_region'] ?? '') : '',
+                'parent_id' => !empty($_POST['parent_id']) ? (int)$_POST['parent_id'] : null,
+                'thumbnail_path' => $thumbnail_path
+            ];
+
+            // Création de l'album
+            if ($this->portfolioModel->createAlbum($albumData)) {
+                $_SESSION['success'] = "Album créé avec succès";
+                header('Location: /admin/portfolio');
+            } else {
+                throw new \Exception("Erreur lors de la création de l'album");
+            }
+
+        } catch (\Exception $e) {
+            $_SESSION['error'] = $e->getMessage();
+            error_log("Erreur lors de la création de l'album : " . $e->getMessage());
+            header('Location: /admin/portfolio/create');
+        }
+        exit;
+    }
+
+    public function deleteAlbum(string $id)
+    {
+        try {
+            // Conversion de l'ID en entier
+            $albumId = (int)$id;
+
+            // Vérification que l'album existe
+            $album = $this->portfolioModel->getAlbumWithPhotos($albumId);
+            if (!$album) {
+                $_SESSION['error'] = "Album non trouvé";
+                header('Location: /admin/portfolio');
+                exit;
+            }
+
+            // Tentative de suppression
+            if ($this->portfolioModel->deleteAlbum($albumId)) {
+                $_SESSION['success'] = "Album supprimé avec succès";
+            } else {
+                $_SESSION['error'] = "Erreur lors de la suppression de l'album";
+            }
+
+        } catch (\Exception $e) {
+            error_log("Erreur lors de la suppression de l'album : " . $e->getMessage());
+            $_SESSION['error'] = "Une erreur est survenue lors de la suppression";
+        }
+
+        // Redirection vers la liste des albums
+        header('Location: /admin/portfolio');
+        exit;
+    }
+
+    public function editAlbum(string $id)
+    {
+        $album = $this->portfolioModel->getAlbumWithPhotos((int)$id);
+        if (!$album) {
+            $_SESSION['error'] = "Album non trouvé";
+            header('Location: /admin/portfolio');
+            exit;
+        }
+
+        $data = [
+            'pageTitle' => 'Modifier l\'album',
+            'album' => $album,
+            'regions' => $this->portfolioModel->getAllRegions()
+        ];
+        $this->render('admin/portfolio/edit', $data);
+    }
+
+    public function updateAlbum(string $id)
+    {
+        try {
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                header('Location: /admin/portfolio');
+                exit;
+            }
+
+            $albumId = (int)$id;
+            $albumData = [
+                'title' => $_POST['title'],
+                'description' => $_POST['description'] ?? '',
+                'region' => $_POST['region'],
+            ];
+
+            // Gestion de l'upload d'une nouvelle image de couverture
+            if (isset($_FILES['thumbnail']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
+                $thumbnail_path = $this->portfolioModel->uploadThumbnail($_FILES['thumbnail']);
+                if ($thumbnail_path) {
+                    $albumData['thumbnail_path'] = $thumbnail_path;
+                }
+            }
+
+            if ($this->portfolioModel->updateAlbum($albumId, $albumData)) {
+                // Gestion des nouvelles photos
+                if (isset($_FILES['new_photos'])) {
+                    $this->portfolioModel->addPhotosToAlbum($albumId, $_FILES['new_photos']);
+                }
+
+                $_SESSION['success'] = "Album mis à jour avec succès";
+            } else {
+                $_SESSION['error'] = "Erreur lors de la mise à jour de l'album";
+            }
+
+        } catch (\Exception $e) {
+            error_log("Erreur lors de la mise à jour de l'album : " . $e->getMessage());
+            $_SESSION['error'] = "Une erreur est survenue lors de la mise à jour";
+        }
+
+        header('Location: /admin/portfolio/edit/' . $id);
+        exit;
     }
 
     // Gestion des tirages

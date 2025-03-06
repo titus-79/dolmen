@@ -11,7 +11,10 @@ $router = new Router();
 $router->get('', 'HomeController@index');
 $router->get('/', 'HomeController@index');
 $router->get('/about', 'AboutController@about');
-$router->get('/portfolio', 'PortfolioController@portfolio');
+$router->get('/portfolio', 'PortfolioController@index');
+$router->get('/portfolio/album/{id}', 'PortfolioController@showAlbum');
+$router->get('/portfolio/region/{region}', 'PortfolioController@showRegion');
+$router->get('/portfolio/photo/{albumId}/{photoId}', 'PortfolioController@showPhoto');
 $router->get('/shop', 'ShopController@index');
 $router->get('/shop/tirage/{id}', 'ShopController@show');
 $router->post('/shop/add-to-cart/{id}', 'ShopController@addToCart');
@@ -57,11 +60,14 @@ $router->get('/admin/events', 'AdminController@events');
 $router->get('/admin/events/edit/{id?}', 'AdminController@editEvent');
 $router->post('/admin/events/edit/{id?}', 'AdminController@editEvent');
 $router->get('/admin/events/delete/{id}', 'AdminController@deleteEvent');
-
+// Routes de gestion du portfolio dans l'admin
 $router->get('/admin/portfolio', 'AdminController@portfolio');
-$router->get('/admin/portfolio/edit/{id?}', 'AdminController@editPortfolio');
-$router->post('/admin/portfolio/edit/{id?}', 'AdminController@editPortfolio');
-$router->get('/admin/portfolio/delete/{id}', 'AdminController@deletePortfolio');
+$router->get('/admin/portfolio/create', 'AdminController@createAlbum');
+$router->post('/admin/portfolio/create', 'AdminController@storeAlbum');
+$router->post('/admin/portfolio/store', 'AdminController@storeAlbum');
+$router->get('/admin/portfolio/edit/{id}', 'AdminController@editAlbum');
+$router->post('/admin/portfolio/edit/{id}', 'AdminController@updateAlbum');
+$router->get('/admin/portfolio/delete/{id}', 'AdminController@deleteAlbum');
 
 $router->get('/admin/prints', 'AdminController@prints');
 $router->get('/admin/prints/edit/{id?}', 'AdminController@editPrint');
@@ -72,7 +78,7 @@ $router->get('/admin/orders', 'AdminController@orders');
 $router->get('/admin/orders/{id}', 'AdminController@orderDetails');
 $router->post('/admin/orders/{id}/status', 'AdminController@updateOrderStatus');
 
-error_log("Routes configurées: " . print_r($router->getRoutes(), true));
+//error_log("Routes configurées: " . print_r($router->getRoutes(), true));
 
 
 // Exécutez le routeur

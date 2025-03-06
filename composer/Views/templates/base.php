@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="/assets/styles/normalize.css">
     <link rel="stylesheet" href="/assets/styles/styles.css">
     <link rel="icon" type="image/x-icon" sizes="16x16" href="/assets/images/Icones/chasseur_dolmen.svg">
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
 
 </head>
 <body>

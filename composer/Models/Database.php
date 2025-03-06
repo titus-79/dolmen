@@ -51,11 +51,20 @@ class Database {
     }
 
     // Méthode pour exécuter des requêtes
-    public function query(string $sql, array $params = []) {
+    public function query(string $sql, array $params = [])
+    {
         try {
             $stmt = $this->connection->prepare($sql);
-            $stmt->execute($params);
-            return $stmt->fetchAll();
+            $result = $stmt->execute($params);
+
+            // Si c'est un SELECT, retourner les résultats
+            if (stripos($sql, 'SELECT') === 0) {
+                return $stmt->fetchAll();
+            }
+
+            // Pour les autres requêtes (INSERT, UPDATE, DELETE), retourner un booléen
+            return $result;
+
         } catch (PDOException $e) {
             error_log("Erreur de requête SQL : " . $e->getMessage());
             throw $e;
@@ -68,5 +77,10 @@ class Database {
     // Fermeture de la connexion
     public function __destruct() {
         $this->connection = null;
+    }
+
+    public function getConnection(): \PDO
+    {
+        return $this->connection;
     }
 }
