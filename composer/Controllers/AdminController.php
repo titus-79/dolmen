@@ -316,12 +316,12 @@ class AdminController extends BaseController
     {
         try {
             $regions = $this->portfolioModel->getAllRegions();
-            $mainAlbums = $this->portfolioModel->getAllAlbums(); // Ajout de cette ligne
+            $mainAlbums = $this->portfolioModel->getAllAlbums();
 
             $data = [
                 'pageTitle' => 'Créer un nouvel album',
                 'regions' => $regions,
-                'mainAlbums' => $mainAlbums // Ajout de cette ligne
+                'mainAlbums' => $mainAlbums
             ];
 
             $this->render('admin/portfolio/create', $data);
@@ -372,19 +372,53 @@ class AdminController extends BaseController
             ];
 
             // Création de l'album
-            if ($this->portfolioModel->createAlbum($albumData)) {
-                $_SESSION['success'] = "Album créé avec succès";
-                header('Location: /admin/portfolio');
-            } else {
+            $albumId = $this->portfolioModel->createAlbum($albumData);
+            if (!$albumId) {
                 throw new \Exception("Erreur lors de la création de l'album");
             }
 
+            // Handle photos with address information
+            if (isset($_FILES['photos']) && is_array($_FILES['photos']['name'])) {
+                $hasFiles = false;
+                foreach ($_FILES['photos']['name'] as $filename) {
+                    if (!empty($filename)) {
+                        $hasFiles = true;
+                        break;
+                    }
+                }
+
+                if ($hasFiles) {
+                    // Collect address data from the form
+                    $addressData = [
+                        'location_names' => $_POST['location_names'] ?? [],
+                        'street_numbers' => $_POST['street_numbers'] ?? [],
+                        'streets' => $_POST['streets'] ?? [],
+                        'cities' => $_POST['cities'] ?? [],
+                        'postal_codes' => $_POST['postal_codes'] ?? [],
+                        'countries' => $_POST['countries'] ?? [],
+                        'gps_coordinates' => $_POST['gps_coordinates'] ?? [],
+                    ];
+
+                    // Upload photos with address information
+                    $uploadedPhotos = $this->portfolioModel->addPhotosToAlbum($albumId, $_FILES['photos'], $addressData);
+
+                    if (empty($uploadedPhotos)) {
+                        $this->db->getConnection()->rollBack();
+                        throw new \Exception("Erreur lors de l'upload des photos");
+                    }
+                }
+            }
+
+            $_SESSION['success'] = "Album créé avec succès";
+            header('Location: /admin/portfolio');
+            exit;
+
         } catch (\Exception $e) {
+            error_log("Erreur dans storeAlbum: " . $e->getMessage());
             $_SESSION['error'] = $e->getMessage();
-            error_log("Erreur lors de la création de l'album : " . $e->getMessage());
             header('Location: /admin/portfolio/create');
+            exit;
         }
-        exit;
     }
 
     public function deleteAlbum(string $id)

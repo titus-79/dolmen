@@ -230,9 +230,8 @@ class PortfolioController extends BaseController
                 throw new \Exception("Erreur lors de la création de l'album");
             }
 
-            // 4. Gestion des photos additionnelles - Amélioration de la vérification
+            // Handle photos with address information
             if (isset($_FILES['photos']) && is_array($_FILES['photos']['name'])) {
-                // Vérification plus précise de la présence de fichiers
                 $hasFiles = false;
                 foreach ($_FILES['photos']['name'] as $filename) {
                     if (!empty($filename)) {
@@ -242,27 +241,33 @@ class PortfolioController extends BaseController
                 }
 
                 if ($hasFiles) {
-                    error_log("Traitement des photos pour l'album " . $albumId);
-                    $uploadedPhotos = $this->portfolioModel->addPhotosToAlbum($albumId, $_FILES['photos']);
+                    // Collect address data from the form
+                    $addressData = [
+                        'location_names' => $_POST['location_names'] ?? [],
+                        'street_numbers' => $_POST['street_numbers'] ?? [],
+                        'streets' => $_POST['streets'] ?? [],
+                        'cities' => $_POST['cities'] ?? [],
+                        'postal_codes' => $_POST['postal_codes'] ?? [],
+                        'countries' => $_POST['countries'] ?? [],
+                        'gps_coordinates' => $_POST['gps_coordinates'] ?? [],
+                    ];
+
+                    // Upload photos with address information
+                    $uploadedPhotos = $this->portfolioModel->addPhotosToAlbum($albumId, $_FILES['photos'], $addressData);
+
                     if (empty($uploadedPhotos)) {
+                        $this->db->getConnection()->rollBack();
                         throw new \Exception("Erreur lors de l'upload des photos");
                     }
-                    error_log("Photos uploadées : " . print_r($uploadedPhotos, true));
                 }
             }
 
-            // 5. Validation de la transaction
-            $this->db->getConnection()->commit();
             $_SESSION['success'] = "Album créé avec succès";
             header('Location: /admin/portfolio');
             exit;
 
         } catch (\Exception $e) {
-            if ($this->db->getConnection()->inTransaction()) {
-                $this->db->getConnection()->rollBack();
-            }
-            error_log("Erreur dans storeAlbum : " . $e->getMessage());
-            error_log("Trace : " . $e->getTraceAsString());
+            error_log("Erreur dans storeAlbum: " . $e->getMessage());
             $_SESSION['error'] = $e->getMessage();
             header('Location: /admin/portfolio/create');
             exit;

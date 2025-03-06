@@ -160,7 +160,7 @@ class Portfolio extends BaseModel
      * @param array $data Données de l'album
      * @return bool Succès de la création
      */
-    public function createAlbum(array $data): bool
+    public function createAlbum(array $data): int
     {
         try {
             // Log pour débogage
@@ -226,7 +226,7 @@ class Portfolio extends BaseModel
      * @param int $photoId ID de la photo
      * @return bool Succès de l'association
      */
-    public function addPhotosToAlbum(int $albumId, array $files): array
+    public function addPhotosToAlbum(int $albumId, array $files, array $addressData = []): array
     {
         try {
             error_log("Début de addPhotosToAlbum pour l'album $albumId");
@@ -258,6 +258,18 @@ class Portfolio extends BaseModel
                 $uploadPath = $uploadDir . $filename;
 
                 if (move_uploaded_file($files['tmp_name'][$key], $uploadPath)) {
+                    $photoAddressData = [
+                        'name' => $addressData['location_names'][$key] ?? null,
+                        'number' => $addressData['street_numbers'][$key] ?? null,
+                        'street' => $addressData['streets'][$key] ?? null,
+                        'city' => $addressData['cities'][$key] ?? 'Unknown City',
+                        'postal_code' => $addressData['postal_codes'][$key] ?? null,
+                        'country' => $addressData['countries'][$key] ?? 'Unknown Country',
+                        'gps_coordinates' => $addressData['gps_coordinates'][$key] ?? null,
+                    ];
+
+                    $addressId = $this->createAddress($photoAddressData);
+
                     // Insertion dans la table picture
                     $stmt = $this->db->getConnection()->prepare("
                     INSERT INTO picture (
@@ -268,15 +280,16 @@ class Portfolio extends BaseModel
                         texte_picture,
                         created_at,
                         id_adress
-                    ) VALUES (?, ?, ?, ?, ?, NOW(), 1)
+                    ) VALUES (?, ?, ?, ?, ?, NOW(), ?)
                 ");
 
                     $stmt->execute([
                         $originalName,
-                        "Photo de l'album",
+                        "Photo de " . ($photoAddressData['name'] ?: $photoAddressData['city']),
                         '/uploads/portfolio/photos/' . $filename,
                         "Chasseur de Dolmens",
-                        "Description de la photo"
+                        "Photo prise à " . $photoAddressData['city'] . ", " . $photoAddressData['country'],
+                        $addressId
                     ]);
 
                     $photoId = $this->db->getConnection()->lastInsertId();
@@ -531,6 +544,46 @@ class Portfolio extends BaseModel
             if ($this->db->getConnection()->inTransaction()) {
                 $this->db->getConnection()->rollBack();
             }
+            throw $e;
+        }
+    }
+
+    /**
+     * Create a new address record
+     *
+     * @param array $addressData Address information
+     * @return int The ID of the created address
+     */
+    public function createAddress(array $addressData): int
+    {
+        try {
+            $query = "
+            INSERT INTO adress (
+                name_adress,
+                number_adress,
+                street_adress,
+                city_adress,
+                postal_code_adress,
+                country_adress,
+                gps_cordinate,
+                created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+        ";
+
+            $stmt = $this->db->getConnection()->prepare($query);
+            $stmt->execute([
+                $addressData['name'] ?? null,
+                $addressData['number'] ? (int)$addressData['number'] : null,
+                $addressData['street'] ?? null,
+                $addressData['city'], // Required
+                $addressData['postal_code'] ?? null,
+                $addressData['country'], // Required
+                $addressData['gps_coordinates'] ?? null
+            ]);
+
+            return (int)$this->db->getConnection()->lastInsertId();
+        } catch (\PDOException $e) {
+            error_log("Error creating address: " . $e->getMessage());
             throw $e;
         }
     }

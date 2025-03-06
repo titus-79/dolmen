@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <!-- Vos styles -->
-    <link rel="stylesheet" href="/assets/styles/portfolio.css">
+    <link rel="stylesheet" href="/public/assets/styles/portfolio.css">
 </head>
 <body>
 <div class="portfolio-container">

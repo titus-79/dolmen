@@ -30,9 +30,9 @@
                 <a href="/portfolio/photo/<?= $album['id'] ?>/<?= $photo['id_picture'] ?>"
                    class="block aspect-square">
                     <img
-                        src="<?= htmlspecialchars($photo['path_picture']) ?>"
-                        alt="<?= htmlspecialchars($photo['alt_picture']) ?>"
-                        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            src="<?= htmlspecialchars($photo['path_picture']) ?>"
+                            alt="<?= htmlspecialchars($photo['alt_picture']) ?>"
+                            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                     <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white p-4 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                         <h3 class="text-lg font-semibold">
@@ -41,6 +41,12 @@
                         <?php if (!empty($photo['texte_picture'])): ?>
                             <p class="text-sm mt-1">
                                 <?= htmlspecialchars($photo['texte_picture']) ?>
+                            </p>
+                        <?php endif; ?>
+                        <?php if (!empty($photo['city_adress']) || !empty($photo['gps_cordinate'])): ?>
+                            <p class="text-xs mt-2">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <?= htmlspecialchars($photo['city_adress'] . ', ' . $photo['country_adress']) ?>
                             </p>
                         <?php endif; ?>
                     </div>

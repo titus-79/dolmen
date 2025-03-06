@@ -92,16 +92,69 @@
                 </div>
 
                 <div class="form-group">
+<!--                    <label for="photos">Photos de l'album</label>-->
+<!--                    <input type="file"-->
+<!--                           id="photos"-->
+<!--                           name="photos[]"-->
+<!--                           multiple-->
+<!--                           accept="image/jpeg,image/png,image/webp"-->
+<!--                           class="form-control">-->
+<!--                    <small class="form-text text-muted">-->
+<!--                        Vous pouvez sélectionner plusieurs photos à la fois-->
+<!--                    </small>-->
                     <label for="photos">Photos de l'album</label>
-                    <input type="file"
-                           id="photos"
-                           name="photos[]"
-                           multiple
-                           accept="image/jpeg,image/png,image/webp"
-                           class="form-control">
-                    <small class="form-text text-muted">
-                        Vous pouvez sélectionner plusieurs photos à la fois
-                    </small>
+                    <div id="photo-uploads">
+                        <div class="photo-upload-item">
+                            <input type="file" name="photos[]" accept="image/jpeg,image/png,image/webp" class="form-control">
+
+                            <div class="address-info ">
+                                <h5>Informations de localisation</h5>
+
+                                <div class="form-row">
+                                    <div class="col-md-6">
+                                        <label>Coordonnées GPS</label>
+                                        <input type="text" name="gps_coordinates[]" placeholder="Ex: 48.8566,2.3522" class="form-control">
+                                        <small class="form-text text-muted">Format: latitude,longitude</small>
+                                    </div>
+
+                                    <div class="col-md-6 mb-2">
+                                        <label>Nom du lieu</label>
+                                        <input type="text" name="location_names[]" class="form-control">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="col-md-6">
+                                        <label>Ville</label>
+                                        <input type="text" name="cities[]" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Pays</label>
+                                        <input type="text" name="countries[]" class="form-control" required>
+                                    </div>
+                                </div>
+
+                                <!-- Optional address fields -->
+                                <div class="form-row mt-2">
+                                    <div class="col-md-2">
+                                        <label>Numéro</label>
+                                        <input type="text" name="street_numbers[]" class="form-control">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Rue</label>
+                                        <input type="text" name="streets[]" class="form-control">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label>Code postal</label>
+                                        <input type="text" name="postal_codes[]" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" id="add-photo" class="btn btn-secondary">+ Ajouter une photo</button>
+                </div>
                 </div>
 
                 <div class="form-actions">
@@ -241,5 +294,21 @@
                 reader.readAsDataURL(file);
             }
         });
+    });
+
+    document.getElementById('add-photo').addEventListener('click', function() {
+        const photoUploads = document.getElementById('photo-uploads');
+        const newItem = photoUploads.querySelector('.photo-upload-item').cloneNode(true);
+
+        // Clear input values
+        newItem.querySelectorAll('input').forEach(input => {
+            if (input.type === 'file') {
+                input.value = '';
+            } else {
+                input.value = '';
+            }
+        });
+
+        photoUploads.appendChild(newItem);
     });
 </script>
