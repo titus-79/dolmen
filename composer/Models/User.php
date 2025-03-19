@@ -11,73 +11,62 @@ use Titus\Dolmen\Models\Group;
 
 class User
 {
-private ?int $id = null;
-private string $name;
-private string $login;
-private string $passwordHash;
-private ?string $status = null; //  todo verifier doublon avec group
-private string $firstname;
-private string $email;
-private string $tel;
-private string $ip;
-private ?\DateTime $lastConn = null; // todo
-private \DateTime $createdAt;
-private ?\DateTime $updateAt = null; // todo
-private ?array $groups = null;
+    private ?int $id = null;
+    private string $lastName;
+    private string $firstName;
+    private string $username;
+    private string $passwordHash;
+    private string $email;
+    private ?string $phone = null;
+    private ?string $ipAddress = null;
+    private ?\DateTime $lastLogin = null;
+    private \DateTime $createdAt;
+    private ?\DateTime $updatedAt = null;
+    private ?int $groupId = null;
+    private ?string $groupName = null;
 
-    public function getCreatedAt(): \DateTime
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTime $createdAt): User
-    {
-        $this->createdAt = $createdAt;
-        return $this;
-    }
-
-    public function getUpdateAt(): \DateTime
-    {
-        return $this->updateAt;
-    }
-
-    public function setUpdateAt(?\DateTime $updateAt): User
-    {
-        $this->updateAt = $updateAt;
-        return $this;
-    }
-
-    public function getId(): int
+    // Getters and setters with new names
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function setId(int $id): User
+    public function setId(int $id): self
     {
         $this->id = $id;
-
         return $this;
     }
 
-    public function getName(): string
+    public function getLastName(): string
     {
-        return $this->name;
+        return $this->lastName;
     }
 
-    public function setName(string $name): User
+    public function setLastName(string $lastName): self
     {
-        $this->name = $name;
+        $this->lastName = $lastName;
         return $this;
     }
 
-    public function getLogin(): string
+    public function getFirstName(): string
     {
-        return $this->login;
+        return $this->firstName;
     }
 
-    public function setLogin(string $login): User
+    public function setFirstName(string $firstName): self
     {
-        $this->login = $login;
+        $this->firstName = $firstName;
+        return $this;
+    }
+
+    public function getUsername(): string
+    {
+        return $this->username;
+    }
+
+    public function setUsername(string $username): self
+    {
+        $this->username = $username;
         return $this;
     }
 
@@ -86,31 +75,9 @@ private ?array $groups = null;
         return $this->passwordHash;
     }
 
-    public function setPasswordHash(string $passwordHash): User
+    public function setPasswordHash(string $passwordHash): self
     {
         $this->passwordHash = $passwordHash;
-        return $this;
-    }
-
-    public function getStatus(): string
-    {
-        return $this->status;
-    }
-
-    public function setStatus(?string $status): User
-    {
-        $this->status = $status;
-        return $this;
-    }
-
-    public function getFirstname(): string
-    {
-        return $this->firstname;
-    }
-
-    public function setFirstname(string $firstname): User
-    {
-        $this->firstname = $firstname;
         return $this;
     }
 
@@ -119,58 +86,86 @@ private ?array $groups = null;
         return $this->email;
     }
 
-    public function setEmail(string $email): User
+    public function setEmail(string $email): self
     {
         $this->email = $email;
         return $this;
     }
 
-    public function getTel(): string
+    public function getPhone(): ?string
     {
-        return $this->tel;
+        return $this->phone;
     }
 
-    public function setTel(string $tel): User
+    public function setPhone(?string $phone): self
     {
-        $this->tel = $tel;
+        $this->phone = $phone;
         return $this;
     }
 
-    public function getIp(): string
+    public function getIpAddress(): ?string
     {
-        return $this->ip;
+        return $this->ipAddress;
     }
 
-    public function setIp(string $ip): User
+    public function setIpAddress(?string $ipAddress): self
     {
-        $this->ip = $ip;
+        $this->ipAddress = $ipAddress;
         return $this;
     }
 
-    public function getLastConn(): ?\DateTime
+    public function getLastLogin(): ?\DateTime
     {
-        return $this->lastConn;
+        return $this->lastLogin;
     }
 
-    public function setLastConn(?\DateTime $lastConn): self
+    public function setLastLogin(?\DateTime $lastLogin): self
     {
-        $this->lastConn = $lastConn;
+        $this->lastLogin = $lastLogin;
         return $this;
     }
 
-    public function getGroups(): ?array
+    public function getCreatedAt(): \DateTime
     {
-        return $this->groups;
+        return $this->createdAt;
     }
 
-    public function setGroups(?array $groups): void
+    public function setCreatedAt(\DateTime $createdAt): self
     {
-        $this->groups = $groups;
+        $this->createdAt = $createdAt;
+        return $this;
     }
 
-    public function addGroup(Group $group): User
+    public function getUpdatedAt(): ?\DateTime
     {
-        $this->groups[] = $group;
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTime $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
+        return $this;
+    }
+
+    public function getGroupId(): ?int
+    {
+        return $this->groupId;
+    }
+
+    public function setGroupId(?int $groupId): self
+    {
+        $this->groupId = $groupId;
+        return $this;
+    }
+
+    public function getGroupName(): ?string
+    {
+        return $this->groupName;
+    }
+
+    public function setGroupName(?string $groupName): self
+    {
+        $this->groupName = $groupName;
         return $this;
     }
 
@@ -182,33 +177,23 @@ private ?array $groups = null;
         $user = new User;
 
         // Propriétés obligatoires
-        $user->setId($properties['id_user'])
-            ->setName($properties['name_user'])
-            ->setLogin($properties['login_user'])
-            ->setPasswordHash($properties['password_hash_user'])
-            ->setFirstname($properties['firstname_user'])
-            ->setEmail($properties['email_user']);
+        $user->setId($properties['id'] ?? null)
+            ->setLastName($properties['last_name'] ?? '')
+            ->setFirstName($properties['first_name'] ?? '')
+            ->setUsername($properties['username'] ?? '')
+            ->setPasswordHash($properties['password_hash'] ?? '')
+            ->setEmail($properties['email'] ?? '')
+            ->setPhone($properties['phone'] ?? null)
+            ->setIpAddress($properties['ip_address'] ?? null)
+            ->setGroupId($properties['group_id'] ?? null);
 
         // Propriétés optionnelles avec vérification
-        if (isset($properties['status_user'])) {
-            $user->setStatus($properties['status_user']);
-        }
-
-        if (isset($properties['tel_user'])) {
-            $user->setTel($properties['tel_user']);
-        }
-
-        if (isset($properties['ip_user'])) {
-            $user->setIp($properties['ip_user']);
-        }
-
-        // Gestion des dates avec vérification
-        if (!empty($properties['last_conn'])) {
+        if (!empty($properties['last_login'])) {
             try {
-                $user->setLastConn(new \DateTime($properties['last_conn']));
+                $user->setLastLogin(new \DateTime($properties['last_login']));
             } catch (\Exception $e) {
-                error_log("Erreur lors de la conversion de last_conn: " . $e->getMessage());
-                $user->setLastConn(null);
+                error_log("Error converting last_login: " . $e->getMessage());
+                $user->setLastLogin(null);
             }
         }
 
@@ -216,19 +201,19 @@ private ?array $groups = null;
             try {
                 $user->setCreatedAt(new \DateTime($properties['created_at']));
             } catch (\Exception $e) {
-                error_log("Erreur lors de la conversion de created_at: " . $e->getMessage());
-                $user->setCreatedAt(new \DateTime()); // Date actuelle par défaut
+                error_log("Error converting created_at: " . $e->getMessage());
+                $user->setCreatedAt(new \DateTime());
             }
         } else {
-            $user->setCreatedAt(new \DateTime()); // Date actuelle par défaut
+            $user->setCreatedAt(new \DateTime());
         }
 
-        if (!empty($properties['update_at'])) {
+        if (!empty($properties['updated_at'])) {
             try {
-                $user->setUpdateAt(new \DateTime($properties['update_at']));
+                $user->setUpdatedAt(new \DateTime($properties['updated_at']));
             } catch (\Exception $e) {
-                error_log("Erreur lors de la conversion de update_at: " . $e->getMessage());
-                $user->setUpdateAt(null);
+                error_log("Error converting updated_at: " . $e->getMessage());
+                $user->setUpdatedAt(null);
             }
         }
 
@@ -239,81 +224,82 @@ private ?array $groups = null;
     {
         try {
             $conn = Connexion::getInstance()->getConn();
-
-            // Start transaction
             $conn->beginTransaction();
 
             if ($this->id !== null) {
                 // Update existing user
-                $sql = "UPDATE users SET 
-                    name_user = :name,
-                    firstname_user = :firstname,
-                    email_user = :email,
-                    tel_user = :tel,
-                    update_at = :update_at";
+                $sql = "UPDATE `user` SET 
+                    last_name = :lastName,
+                    first_name = :firstName,
+                    email = :email,
+                    phone = :phone,
+                    updated_at = :updatedAt";
 
                 $params = [
-                    ':name'      => $this->name,
-                    ':firstname' => $this->firstname,
-                    ':email'     => $this->email,
-                    ':tel'       => $this->tel,
-                    ':update_at' => (new DateTime())->format('Y-m-d H:i:s')
+                    ':lastName' => $this->lastName,
+                    ':firstName' => $this->firstName,
+                    ':email' => $this->email,
+                    ':phone' => $this->phone,
+                    ':updatedAt' => (new DateTime())->format('Y-m-d H:i:s')
                 ];
+
                 // Only update password if it's set
                 if (isset($this->passwordHash)) {
-                    $sql .= ", password_hash_user = :password";
+                    $sql .= ", password_hash = :password";
                     $params[':password'] = $this->passwordHash;
                 }
 
-                $sql .= " WHERE id_user = :id";
+                // Update group if provided
+                if ($this->groupId !== null) {
+                    $sql .= ", group_id = :groupId";
+                    $params[':groupId'] = $this->groupId;
+                }
+
+                $sql .= " WHERE id = :id";
                 $params[':id'] = $this->id;
 
                 $stmt = $conn->prepare($sql);
                 $result = $stmt->execute($params);
             } else {
                 // Insert new user
-                $sql = "INSERT INTO users (
-                    name_user, 
-                    login_user, 
-                    password_hash_user, 
-                    firstname_user, 
-                    email_user, 
-                    tel_user, 
-                    ip_user, 
+                $sql = "INSERT INTO `user` (
+                    last_name, 
+                    first_name, 
+                    username, 
+                    password_hash, 
+                    email, 
+                    phone, 
+                    ip_address, 
+                    group_id,
                     created_at
                 ) VALUES (
-                    :name,
-                    :login,
+                    :lastName,
+                    :firstName,
+                    :username,
                     :password,
-                    :firstname,
                     :email,
-                    :tel,
-                    :ip,
-                    :created_at
+                    :phone,
+                    :ipAddress,
+                    :groupId,
+                    :createdAt
                 )";
 
                 $stmt = $conn->prepare($sql);
 
                 $result = $stmt->execute([
-                    ':name'       => $this->name,
-                    ':login'      => $this->login,
-                    ':password'   => $this->passwordHash,
-                    ':firstname'  => $this->firstname,
-                    ':email'      => $this->email,
-                    ':tel'        => $this->tel,
-                    ':ip'         => $_SERVER['REMOTE_ADDR'],
-                    ':created_at' => (new DateTime())->format('Y-m-d H:i:s')
+                    ':lastName' => $this->lastName,
+                    ':firstName' => $this->firstName,
+                    ':username' => $this->username,
+                    ':password' => $this->passwordHash,
+                    ':email' => $this->email,
+                    ':phone' => $this->phone,
+                    ':ipAddress' => $_SERVER['REMOTE_ADDR'] ?? null,
+                    ':groupId' => $this->groupId ?? 3, // Default to Member (ID 3)
+                    ':createdAt' => (new DateTime())->format('Y-m-d H:i:s')
                 ]);
 
                 if ($result) {
                     $this->id = (int)$conn->lastInsertId();
-
-                    // Add user to Member group
-                    $memberGroup = Group::findByName('Member');
-                    if ($memberGroup) {
-                        $userGroup = new UserGroup($this->id, $memberGroup->getId());
-                        $result = $userGroup->save();
-                    }
                 }
             }
 
@@ -335,35 +321,44 @@ private ?array $groups = null;
 
     public function hasRole(string $roleName): bool
     {
-        if ($this->groups === null) {
-            $conn = Connexion::getInstance()->getConn();
-            $stmt = $conn->prepare(
-                "SELECT g.name FROM `groups` g 
-             JOIN users_groups ug ON g.id_group = ug.id_group 
-             WHERE ug.id_user = ?"
-            );
-            $stmt->execute([$this->id]);
-            $this->groups = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        if ($this->groupName === null && $this->groupId !== null) {
+            // Fetch the group name if needed
+            try {
+                $conn = Connexion::getInstance()->getConn();
+                $stmt = $conn->prepare(
+                    "SELECT name FROM `user_group` WHERE id = ?"
+                );
+                $stmt->execute([$this->groupId]);
+                $this->groupName = $stmt->fetchColumn();
+            } catch (PDOException $e) {
+                error_log("Error fetching group name: " . $e->getMessage());
+            }
         }
 
-        return in_array($roleName, $this->groups);
+        return $this->groupName === $roleName;
     }
 
-    public static function findByLogin(string $login): ?User
+    public static function findByUsername(string $username): ?User
     {
         try {
             $conn = Connexion::getInstance()->getConn();
-            $stmt = $conn->prepare("SELECT * FROM users WHERE login_user = ?");
-            $stmt->execute([$login]);
+            $stmt = $conn->prepare("
+                SELECT u.*, g.name as group_name 
+                FROM `user` u
+                LEFT JOIN `user_group` g ON u.group_id = g.id
+                WHERE u.username = ?
+            ");
+            $stmt->execute([$username]);
 
             if ($userData = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-                return self::hydrate($userData);
+                $user = self::hydrate($userData);
+                $user->setGroupName($userData['group_name']);
+                return $user;
             }
 
             return null;
-        } catch (\PDOException $e) {
-            // Log l'erreur
-            error_log("Erreur lors de la recherche d'utilisateur : " . $e->getMessage());
+        } catch (PDOException $e) {
+            error_log("Error finding user by username: " . $e->getMessage());
             throw $e;
         }
     }
@@ -434,7 +429,7 @@ private ?array $groups = null;
             error_log("Statut newsletter : " . ($newsletterSubscription ? 'Abonné' : 'Désabonné'));
 
             if ($newsletterSubscription) {
-                error_log("dans s'abonner" );
+                error_log("dans s'abonner");
                 // S'abonner ou réabonner
                 $success = NewsletterSubscription::subscribe($userId, $data['email']) && $success;
                 if (!NewsletterSubscription::subscribe($userId, $data['email'])) {
@@ -443,7 +438,7 @@ private ?array $groups = null;
                 }
             } else {
                 // Se désabonner
-                error_log("dans se désabonner" );
+                error_log("dans se désabonner");
                 $success = NewsletterSubscription::unsubscribe($userId) && $success;
             }
 
@@ -493,6 +488,7 @@ private ?array $groups = null;
             return false;
         }
     }
+
     public static function deleteUser($userId): bool
     {
         try {
